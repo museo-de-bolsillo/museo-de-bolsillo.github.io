@@ -8,9 +8,27 @@ Página web que se abre con el QR del póster. Al apuntar la cámara al dibujo d
 
 Sobre la obra flotan seis símbolos dorados tomados de la obra (espiral, ojo, sol que gotea, cuadros Quimbaya, flor y moneda), que laten y llevan el nombre de su sala: Sie, Búho, Atardecer, Quimbaya, Flores y Tarjeta. Al reconocer el póster aparece un mensaje que invita a tocarlos y un contador muestra las salas descubiertas (0/6). Cada símbolo visitado se llena de oro y, al completar las seis, aparece un mensaje de cierre con el resumen de las lecciones. Los símbolos se definen en `PINES`, en `contenido.js`.
 
-Al tocar un elemento se abre su sala, con la lección y un dato. Desde la sala del atardecer se entra al paisaje, y desde la de las flores, a la orquídea. Cada toque deja una onda en la obra.
+Al reconocer el póster, una línea dorada lo recorre de arriba abajo "despertando" la obra, y después el sol, la isla flotante, las orquídeas y la tarjeta salen del papel en 3D. Del sol caen gotas de oro que abren ondas en la laguna.
+
+La obra reacciona al tocarla, con chispas doradas en el punto tocado:
+
+| Al tocar… | Pasa esto |
+|---|---|
+| El sol | Suelta una lluvia de gotas |
+| La isla | Gira |
+| Las orquídeas | Florecen |
+| El búho | Eriza las plumas y abre la pupila |
+| Sie | Parpadea |
+| La cinta Quimbaya | Brilla |
+| La tarjeta | Da una vuelta |
+
+Los símbolos abren la sala de cada elemento, con la lección y un dato. Desde la sala del atardecer se entra al paisaje, y desde la de las flores, a la orquídea.
+
+**Zoom.** En modo cámara se acerca la vista con dos dedos o con doble toque. El botón "Ver de cerca" trae la obra a la pantalla para explorarla sin apuntar al póster. Ahí, y en el modo sin cámara, se acerca con dos dedos, con doble toque o con los botones + y −, y se recorre arrastrando.
 
 Sin cámara, la obra se mueve al inclinar el celular. Ese es el plan B, junto con el video.
+
+**Piezas recortadas.** `imagenes/sol.png`, `isla.png` y `orquideas.png` salen de la composición, y `composicion_base.jpg` es la composición con esos huecos rellenos. Las genera `herramientas/recortes.py`. Si cambia la composición, hay que volver a generarlas y revisar las cajas `RECORTES` en `obra.js`.
 
 ## Archivos
 

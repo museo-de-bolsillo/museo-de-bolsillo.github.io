@@ -65,6 +65,9 @@
   #progreso .puntos { display: flex; gap: 5px; }
   #progreso .punto { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--oro); }
   #progreso .punto.lleno { background: var(--oro); }
+  #de-cerca { top: max(10px, env(safe-area-inset-top)); right: 12px; }
+  #zoom { position: fixed; right: 12px; top: 50%; transform: translateY(-50%); z-index: 6; display: grid; gap: 8px; }
+  #zoom button { width: 42px; height: 42px; border-radius: 50%; font-size: 1.3rem; font-weight: 600; line-height: 1; display: grid; place-items: center; padding: 0; }
   @media (prefers-reduced-motion: reduce) { #ayuda { animation: none; } }
 
   /* Ficha de sala */
@@ -103,6 +106,7 @@
   <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2 12q10-10 20 0q-10 10-20 0z"/><circle cx="12" cy="12" r="2.6"/></symbol>
   <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 15v4M12 15v6M15 15v3"/></symbol>
   <symbol id="i-volver" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/></symbol>
 </svg>
 
 <main id="inicio">
@@ -120,7 +124,7 @@
       </defs>
       <rect width="360" height="18" fill="url(#quimbaya)"/>
     </svg>
-    <p>La tarjeta que guarda la moneda abre un museo. Apunta la cámara al póster, mira cómo la obra cobra vida y toca sus símbolos dorados para recorrer las seis salas.</p>
+    <p>La tarjeta que guarda la moneda abre un museo. Apunta la cámara al póster y mira cómo la obra cobra vida. Tócala para que reaccione, y sigue sus símbolos dorados por las seis salas.</p>
     <div class="guia">
       <img src="targets/poster.jpg" alt="Miniatura del póster: Sie y el búho con orquídeas, el paisaje y la tarjeta">
       <p>Apunta a este dibujo en el póster, o en otra pantalla, y mantenlo completo en la cámara.</p>
@@ -139,7 +143,12 @@
 <div id="pista" class="velo" hidden>Apunta al póster</div>
 <button type="button" id="volver" class="flotante velo" hidden aria-label="Volver al inicio"><svg class="icono"><use href="#i-volver"/></svg></button>
 <button type="button" id="a-obra" class="flotante velo" hidden><svg class="icono"><use href="#i-volver"/></svg>Volver a la obra</button>
-<p id="ayuda" class="velo" hidden><svg class="icono"><use href="#i-espiral"/></svg>Toca los símbolos dorados para recorrer el museo</p>
+<button type="button" id="de-cerca" class="flotante velo" hidden><svg class="icono"><use href="#i-lupa"/></svg>Ver de cerca</button>
+<div id="zoom" hidden>
+  <button type="button" id="zoom-mas" class="velo" aria-label="Acercar">+</button>
+  <button type="button" id="zoom-menos" class="velo" aria-label="Alejar">−</button>
+</div>
+<p id="ayuda" class="velo" hidden><svg class="icono"><use href="#i-espiral"/></svg>Toca la obra para despertarla y los símbolos para ver cada sala</p>
 <div id="progreso" class="velo" hidden><span id="progreso-texto">Salas 0/6</span><span class="puntos" id="puntos"></span></div>
 
 <section id="ficha" hidden aria-live="polite">
@@ -173,6 +182,6 @@
     setTimeout(function () { avisar("La experiencia está tardando en cargar." + consejo); }, 10000);
   })();
 </script>
-<script type="module" src="./app.js?v=6"></script>
+<script type="module" src="./app.js?v=7"></script>
 </body>
 </html>

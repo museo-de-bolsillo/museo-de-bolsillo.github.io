@@ -42,7 +42,7 @@ vec2 toques(vec2 p, float t) {
       vec2 v = p - q.xy;
       float r = length(v) + 0.001;
       float x = (r - edad * 280.0) / 45.0;
-      d += v / r * exp(-x * x) * sin(x * 6.3) * 9.0 * (1.0 - edad / 2.5);
+      d += v / r * exp(-x * x) * sin(x * 6.3) * 16.0 * (1.0 - edad / 2.5);
     }
   }
   return d;
@@ -80,55 +80,76 @@ vec3 caida(vec2 p, float t, vec2 a, vec2 b, float r, float periodo, float dur, v
   return col;
 }`;
 
+// La composición sin el sol, la isla ni las orquídeas: esos salen del póster en 3D (ver obra.js).
 export const FRAG_COMP = COMUN + /* glsl */ `
 uniform sampler2D uMascara;
 uniform float uHueco;
+uniform float uRevela;     // línea dorada que despierta la obra (en píxeles de alto)
+uniform vec4 uDisparos;    // momento del último toque: x Sie, y búho, z cinta Quimbaya
+float pulso(float d, float dur) { return d > 0.0 && d < dur ? 1.0 + 3.2 * (1.0 - abs(d - dur * 0.5) / (dur * 0.5)) : 1.0; }
 void main() {
   vec2 p = pixel();
   float t = uTiempo;
   vec2 D = vec2(0.0);
-  // La cresta de Sie (x < 500) y la línea del cabello no se deforman: si se mueven, se ven cortadas.
-  float cresta = 1.0 - smoothstep(380.0, 400.0, p.x) + smoothstep(488.0, 505.0, p.x);
-  // Cielo del paisaje dentro del cabello, lejos del contorno.
-  D += oleaje(p, t, 2.2, elipse(p, vec2(655.0, 228.0), vec2(135.0, 100.0), 0.5), 0.045, 1.3);
-  // Gotas del sol que se alargan.
-  D.y += gauss(p, vec2(703.0, 330.0), vec2(40.0, 60.0)) * step(285.0, p.y) * 7.0 * (0.5 + 0.5 * sin(t * 2.1)) * clamp((p.y - 290.0) / 70.0, 0.0, 1.0);
-  // Laguna e isla.
+  // Cielo del paisaje dentro del cabello: fluye y gira, lejos de la cresta de Sie.
+  float cielo = elipse(p, vec2(655.0, 228.0), vec2(135.0, 100.0), 0.5);
+  D += oleaje(p, t, 4.5, cielo, 0.04, 1.5);
+  D += girar(p, vec2(700.0, 150.0), 0.12 * sin(t * 0.8), gauss(p, vec2(700.0, 150.0), vec2(60.0)) * cielo);
+  // Laguna.
   float r = length((p - vec2(683.0, 540.0)) / vec2(80.0, 22.0));
-  D.y += elipse(p, vec2(683.0, 540.0), vec2(82.0, 24.0), 0.35) * 0.9 * sin(r * 9.0 - t * 4.0);
-  D.y += elipse(p, vec2(525.0, 243.0), vec2(52.0, 64.0), 0.5) * smoothstep(472.0, 488.0, p.x) * 4.5 * sin(t * TAU / 3.0);
-  // Orquídeas desde el tallo.
-  D += girar(p, vec2(330.0, 235.0), 0.035 * sin(t * 1.6), gauss(p, vec2(300.0, 140.0), vec2(95.0)) * cresta);
-  D += girar(p, vec2(190.0, 425.0), 0.035 * sin(t * 1.6 + 1.3), gauss(p, vec2(125.0, 385.0), vec2(80.0)));
-  D += girar(p, vec2(110.0, 485.0), 0.035 * sin(t * 1.6 + 2.1), gauss(p, vec2(60.0, 470.0), vec2(55.0)));
-  D += girar(p, vec2(230.0, 645.0), 0.035 * sin(t * 1.6 + 2.9), gauss(p, vec2(140.0, 630.0), vec2(85.0)));
-  D += girar(p, vec2(320.0, 800.0), 0.035 * sin(t * 1.6 + 3.7), gauss(p, vec2(265.0, 740.0), vec2(85.0)));
-  // Enredadera y plumas del búho.
-  D.x += gauss(p, vec2(100.0, 400.0), vec2(80.0, 420.0)) * 1.6 * sin(p.y * 0.03 + t * 2.2);
-  D.x += elipse(p, vec2(330.0, 470.0), vec2(210.0, 330.0), 0.35) * (1.0 - gauss(p, vec2(320.0, 440.0), vec2(60.0, 50.0))) * (1.0 - smoothstep(380.0, 398.0, p.x)) * sin((p.x + p.y) * 0.04 - t * 2.4);
+  D.y += elipse(p, vec2(683.0, 540.0), vec2(82.0, 24.0), 0.35) * 1.8 * sin(r * 9.0 - t * 4.0);
+  // Enredadera y plumas del búho (se erizan al tocarlo).
+  float erizo = 1.0 + 3.0 * exp(-max(t - uDisparos.y, 0.0) * 2.5) * step(0.0, t - uDisparos.y);
+  D.x += gauss(p, vec2(100.0, 400.0), vec2(80.0, 420.0)) * 3.2 * sin(p.y * 0.03 + t * 2.2);
+  D.x += elipse(p, vec2(330.0, 470.0), vec2(210.0, 330.0), 0.35) * (1.0 - gauss(p, vec2(320.0, 440.0), vec2(60.0, 50.0))) * (1.0 - smoothstep(380.0, 398.0, p.x)) * 2.4 * erizo * sin((p.x + p.y) * 0.04 - t * 2.4);
   // Frailejones del fondo.
-  D += girar(p, vec2(45.0, 1030.0), 0.03 * sin(t * 2.0), gauss(p, vec2(45.0, 870.0), vec2(45.0, 90.0)));
-  D += girar(p, vec2(100.0, 1030.0), 0.03 * sin(t * 2.0 + 1.4), gauss(p, vec2(100.0, 920.0), vec2(45.0, 90.0)));
-  D += girar(p, vec2(205.0, 1030.0), 0.03 * sin(t * 2.0 + 2.6), gauss(p, vec2(205.0, 960.0), vec2(45.0, 90.0)));
-  D += girar(p, vec2(770.0, 1030.0), 0.03 * sin(t * 2.0 + 3.3), gauss(p, vec2(770.0, 930.0), vec2(45.0, 90.0)));
-  // Pupila del búho y parpadeo de Sie.
-  float f = 1.0 + 0.1 * sin(t * 1.1) + 0.08 * (cierre(t, 4.5, 0.0, 0.7) - 1.0);
+  D += girar(p, vec2(45.0, 1030.0), 0.05 * sin(t * 2.0), gauss(p, vec2(45.0, 870.0), vec2(45.0, 90.0)));
+  D += girar(p, vec2(100.0, 1030.0), 0.05 * sin(t * 2.0 + 1.4), gauss(p, vec2(100.0, 920.0), vec2(45.0, 90.0)));
+  D += girar(p, vec2(205.0, 1030.0), 0.05 * sin(t * 2.0 + 2.6), gauss(p, vec2(205.0, 960.0), vec2(45.0, 90.0)));
+  D += girar(p, vec2(770.0, 1030.0), 0.05 * sin(t * 2.0 + 3.3), gauss(p, vec2(770.0, 930.0), vec2(45.0, 90.0)));
+  // Pupila del búho (se abre mucho al tocarlo) y parpadeo de Sie.
+  float f = 1.0 + 0.16 * sin(t * 1.1) + 0.1 * (cierre(t, 4.0, 0.0, 0.7) - 1.0) + 0.12 * (pulso(t - uDisparos.y, 0.9) - 1.0);
   vec2 v = p - vec2(326.0, 437.0);
   float k = clamp((length(v) - 16.0) / 18.0, 0.0, 1.0);
   D += v * (1.0 - 1.0 / f) * (1.0 - k * k * (3.0 - 2.0 * k));
-  D.y -= elipse(p, vec2(497.0, 432.0), vec2(60.0, 44.0), 0.45) * (cierre(t, 4.5, 0.05, 0.2) - 1.0) * (p.y - 432.0);
+  float g = max(cierre(t, 3.6, 0.05, 0.22), pulso(t - uDisparos.x, 0.25));
+  D.y -= elipse(p, vec2(497.0, 432.0), vec2(60.0, 44.0), 0.45) * (g - 1.0) * (p.y - 432.0);
   D += toques(p, t);
 
   vec2 s = p - D;
   vec3 col = texture2D(uTex, aUv(s)).rgb;
-  float fase = mod(t, 6.0) / 1.8;
-  if (fase < 1.0) col = mix(col, vec3(0.98, 0.804, 0.373), brillo(s.y, 515.0 + 370.0 * fase, 28.0) * texture2D(uMascara, aUv(s)).r * 0.55);
-  col = caida(p, t, vec2(697.0, 370.0), vec2(683.0, 532.0), 4.2, 1.6, 0.85, vec2(683.0, 540.0), 72.0, col);
+  // Brillo dorado que baja por la cinta Quimbaya (cada 6 s, o al tocarla).
+  float fase = t - uDisparos.z < 1.8 ? (t - uDisparos.z) / 1.8 : mod(t, 6.0) / 1.8;
+  if (fase < 1.0) col = mix(col, vec3(0.98, 0.804, 0.373), brillo(s.y, 515.0 + 370.0 * fase, 28.0) * texture2D(uMascara, aUv(s)).r * 0.65);
+  // Ondas donde caen las gotas del sol (las gotas son 3D).
+  float edad = mod(t, 1.6) - 0.85;
+  if (edad < 0.0) edad += 1.6;
+  for (int i = 0; i < 3; i++) {
+    float e = edad - float(i) * 0.25;
+    if (e > 0.0 && e < 1.4) col = mix(col, vec3(0.98, 0.925, 0.627), anillo(p, vec2(683.0, 540.0), 72.0 * (0.12 + 0.88 * e / 1.4), 1.8) * 0.9 * (1.0 - e / 1.4));
+  }
   // Cuando la tarjeta flota, su sitio en la obra queda en sombra.
   vec2 q = abs(p - vec2(406.0, 945.5)) - vec2(135.0, 76.5) + 12.0;
   float sitio = 1.0 - smoothstep(-1.0, 1.5, length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 12.0);
   col = mix(col, col * 0.3, sitio * uHueco);
-  gl_FragColor = vec4(col, uOpacidad);
+  // La obra despierta de arriba abajo, detrás de una línea dorada.
+  float dl = (p.y - uRevela) / 9.0;
+  float linea = exp(-dl * dl);
+  float visible = 1.0 - smoothstep(uRevela - 3.0, uRevela + 3.0, p.y);
+  col = mix(col, vec3(1.0, 0.86, 0.45), linea * 0.9);
+  gl_FragColor = vec4(col, uOpacidad * max(visible, linea));
+}`;
+
+// Piezas recortadas que salen del póster (sol, isla, orquídeas).
+export const FRAG_RECORTE = /* glsl */ `
+precision highp float;
+uniform sampler2D uTex;
+uniform float uOpacidad;
+uniform float uBrillo;
+varying vec2 vUv;
+void main() {
+  vec4 c = texture2D(uTex, vUv);
+  gl_FragColor = vec4(min(c.rgb * (1.0 + uBrillo) + uBrillo * 0.15, 1.0), c.a * uOpacidad);
 }`;
 
 export const FRAG_PAISAJE = COMUN + /* glsl */ `
@@ -138,13 +159,13 @@ void main() {
   float t = uTiempo;
   vec2 D = vec2(0.0);
   float isla = elipse(p, vec2(150.0, 255.0), vec2(100.0, 115.0), 0.5);
-  D += oleaje(p, t, 3.0, clamp((470.0 - p.y) / 60.0, 0.0, 1.0) * (1.0 - isla), 0.03, 1.1);
+  D += oleaje(p, t, 5.0, clamp((470.0 - p.y) / 60.0, 0.0, 1.0) * (1.0 - isla), 0.03, 1.2);
   D += girar(p, vec2(305.0, 85.0), 0.18 * sin(t * 0.9), gauss(p, vec2(305.0, 85.0), vec2(70.0)));
   D += girar(p, vec2(725.0, 115.0), 0.18 * sin(t * 0.9 + 1.6), gauss(p, vec2(725.0, 115.0), vec2(70.0)));
   D.y += gauss(p, vec2(538.0, 410.0), vec2(75.0, 80.0)) * step(330.0, p.y) * 10.0 * (0.5 + 0.5 * sin(t * 2.0)) * clamp((p.y - 335.0) / 140.0, 0.0, 1.0);
   float r = length((p - vec2(500.0, 730.0)) / vec2(165.0, 45.0));
   D.y += elipse(p, vec2(500.0, 730.0), vec2(168.0, 47.0), 0.35) * 1.4 * sin(r * 9.0 - t * 4.0);
-  D.y += isla * 7.0 * sin(t * TAU / 3.0);
+  D.y += isla * 11.0 * sin(t * TAU / 3.0);
   D += girar(p, vec2(68.0, 925.0), 0.035 * sin(t * 2.0), gauss(p, vec2(50.0, 860.0), vec2(70.0, 110.0)));
   D += girar(p, vec2(105.0, 1030.0), 0.035 * sin(t * 2.0 + 1.2), gauss(p, vec2(105.0, 930.0), vec2(70.0, 110.0)));
   D += girar(p, vec2(210.0, 1030.0), 0.035 * sin(t * 2.0 + 2.4), gauss(p, vec2(210.0, 965.0), vec2(70.0, 110.0)));
@@ -164,11 +185,11 @@ void main() {
   vec2 p = pixel();
   float t = uTiempo;
   vec2 D = vec2(0.0);
-  D += girar(p, vec2(410.0, 340.0), 0.03 * sin(t * 1.5), gauss(p, vec2(440.0, 300.0), vec2(150.0)));
-  D += girar(p, vec2(520.0, 560.0), 0.03 * sin(t * 1.5 + 1.1), gauss(p, vec2(540.0, 510.0), vec2(165.0)));
-  D += girar(p, vec2(520.0, 690.0), 0.03 * sin(t * 1.5 + 2.2), gauss(p, vec2(460.0, 770.0), vec2(165.0)));
-  D += girar(p, vec2(340.0, 395.0), 0.03 * sin(t * 1.5 + 3.0), gauss(p, vec2(280.0, 430.0), vec2(100.0)));
-  D += girar(p, vec2(240.0, 210.0), 0.03 * sin(t * 1.5 + 3.8), gauss(p, vec2(170.0, 130.0), vec2(90.0)));
+  D += girar(p, vec2(410.0, 340.0), 0.055 * sin(t * 1.5), gauss(p, vec2(440.0, 300.0), vec2(150.0)));
+  D += girar(p, vec2(520.0, 560.0), 0.055 * sin(t * 1.5 + 1.1), gauss(p, vec2(540.0, 510.0), vec2(165.0)));
+  D += girar(p, vec2(520.0, 690.0), 0.055 * sin(t * 1.5 + 2.2), gauss(p, vec2(460.0, 770.0), vec2(165.0)));
+  D += girar(p, vec2(340.0, 395.0), 0.055 * sin(t * 1.5 + 3.0), gauss(p, vec2(280.0, 430.0), vec2(100.0)));
+  D += girar(p, vec2(240.0, 210.0), 0.055 * sin(t * 1.5 + 3.8), gauss(p, vec2(170.0, 130.0), vec2(90.0)));
   D += girar(p, vec2(340.0, 1030.0), 0.02 * sin(t * 1.8), gauss(p, vec2(190.0, 910.0), vec2(170.0, 130.0)));
   D.y -= elipse(p, vec2(582.0, 950.0), vec2(15.0, 17.6), 0.45) * (cierre(t, 3.8, 0.0, 0.2) - 1.0) * (p.y - 950.0);
   D += toques(p, t);
