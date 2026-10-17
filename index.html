@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Museo de Bolsillo</title>
+<meta name="description" content="Experiencia de realidad aumentada: el póster cobra vida y abre un museo de educación financiera.">
+<meta name="theme-color" content="#4B1C8F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --fondo: #3A1670;
+    --fondo-2: #5B23A8;
+    --tinta: #FFFFFF;
+    --suave: #D9CCF2;
+    --magenta: #E0569A;
+    --oro: #F7B22C;
+    --panel: #FFFBF4;
+    --panel-tinta: #1A1626;
+    --panel-suave: #5C5868;
+    --turquesa: #1D6E73;
+    --f-titulo: "Young Serif", Georgia, serif;
+    --f-texto: "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--tinta); font-family: var(--f-texto); -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  button, a.btn { font: inherit; cursor: pointer; }
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--oro); outline-offset: 3px; }
+
+  #inicio { position: fixed; inset: 0; overflow-y: auto; background: radial-gradient(120% 80% at 50% 0%, var(--fondo-2), var(--fondo)); display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); z-index: 10; }
+  .portada { width: min(100%, 440px); display: grid; gap: 18px; }
+  .ojo { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--oro); font-weight: 700; }
+  h1 { font-family: var(--f-titulo); font-weight: 400; font-size: clamp(2.6rem, 11vw, 3.4rem); line-height: 1; margin: 0; }
+  .portada p { margin: 0; line-height: 1.55; font-size: 1.05rem; color: var(--suave); }
+  .guia { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; background: rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; }
+  .guia img { width: 96px; border-radius: 8px; display: block; }
+  .guia p { font-size: 0.95rem; color: var(--tinta); }
+  .acciones { display: grid; gap: 10px; }
+  .btn { display: block; text-align: center; text-decoration: none; border: 0; border-radius: 14px; padding: 16px 18px; font-weight: 700; font-size: 1.05rem; }
+  .btn-principal { background: var(--oro); color: #2A1250; }
+  .btn-secundario { background: transparent; color: var(--tinta); border: 2px solid rgba(255,255,255,0.7); }
+  .btn-texto { background: none; color: var(--suave); text-decoration: underline; padding: 6px; font-weight: 600; }
+  .creditos { font-size: 0.8rem; color: var(--suave); border-top: 1px solid rgba(255,255,255,0.18); padding-top: 14px; }
+  #aviso { background: #FFF2DC; color: #6B4A0C; border-radius: 10px; padding: 12px 14px; font-size: 0.95rem; }
+
+  #escenario { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(circle at 50% 40%, #4B2290, #1B0B36); }
+  #escenario canvas { touch-action: none; }
+  #pista { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: rgba(26,12,52,0.8); color: #FFFFFF; padding: 9px 16px; border-radius: 99px; font-size: 0.92rem; z-index: 5; white-space: nowrap; pointer-events: none; max-width: calc(100% - 120px); overflow: hidden; text-overflow: ellipsis; }
+  .flotante { position: fixed; z-index: 6; background: rgba(26,12,52,0.8); color: #FFFFFF; border: 0; border-radius: 99px; height: 42px; padding: 0 14px; font-weight: 600; }
+  #volver { top: max(10px, env(safe-area-inset-top)); left: 12px; width: 42px; padding: 0; font-size: 1.3rem; }
+  #a-obra { bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
+
+  #ficha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; background: var(--panel); color: var(--panel-tinta); border-radius: 20px 20px 0 0; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 72vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.35); }
+  .ficha-in { width: min(100%, 560px); margin: 0 auto; display: grid; gap: 12px; }
+  #ficha h2 { font-family: var(--f-titulo); font-weight: 400; font-size: 1.6rem; margin: 0; line-height: 1.1; }
+  #ficha .autora { font-size: 0.85rem; color: var(--turquesa); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  #ficha .rotulo { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--panel-suave); font-weight: 700; display: block; margin-bottom: 2px; }
+  #ficha p { margin: 0; line-height: 1.5; }
+  #ficha .dato { background: #F3EBDD; border-radius: 12px; padding: 12px 14px; }
+  #ficha .dato strong { font-family: var(--f-titulo); font-weight: 400; font-size: 1.1rem; color: #8E2257; }
+  #ficha .fuente { font-size: 0.8rem; color: var(--panel-suave); margin-top: 4px; }
+  .ficha-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
+  .ficha-acciones button { border: 0; border-radius: 12px; padding: 12px 18px; font-weight: 700; }
+  #entrar { background: #5B23A8; color: #FFFFFF; }
+  #cerrar-ficha { background: #E9E3F3; color: var(--panel-tinta); }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+    "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+  }
+}
+</script>
+</head>
+<body>
+
+<main id="inicio">
+  <div class="portada">
+    <span class="ojo">Proyecto de Diseño III · UNAD</span>
+    <h1>Museo de Bolsillo</h1>
+    <p>La tarjeta que guarda la moneda abre un museo. Apunta la cámara al póster y mira cómo la obra cobra vida. Toca cada elemento para entrar a su sala.</p>
+    <div class="guia">
+      <img src="targets/poster.jpg" alt="Miniatura del dibujo del póster: Sie y el búho con orquídeas, el paisaje y la tarjeta">
+      <p>Apunta a este dibujo en el póster, o en otra pantalla, y mantenlo completo en la cámara.</p>
+    </div>
+    <div class="acciones">
+      <button class="btn btn-principal" id="btn-camara">Abrir la cámara</button>
+      <button class="btn btn-secundario" id="btn-previa">Ver sin cámara</button>
+      <a class="btn btn-texto" href="video/museo-de-bolsillo.mp4">Ver el video de la animación</a>
+    </div>
+    <p id="aviso" hidden></p>
+    <p class="creditos">Obra original de Ledania para el Kit de Bienvenida de Nu. Reinterpretación de Kass, Santi, Vic, Dani y Yotas. Ejercicio académico de la UNAD, sin relación con Nu. La cámara no graba ni guarda nada.</p>
+  </div>
+</main>
+
+<div id="escenario" hidden></div>
+<div id="pista" hidden>Apunta al póster</div>
+<button id="volver" class="flotante" hidden aria-label="Volver al inicio">←</button>
+<button id="a-obra" class="flotante" hidden>Volver a la obra</button>
+
+<section id="ficha" hidden aria-live="polite">
+  <div class="ficha-in">
+    <span class="autora" id="ficha-autora"></span>
+    <h2 id="ficha-nombre"></h2>
+    <p><span class="rotulo">En la obra</span><span id="ficha-obra"></span></p>
+    <p><span class="rotulo">Lección</span><span id="ficha-leccion"></span></p>
+    <div class="dato"><strong id="ficha-dato"></strong><p class="fuente" id="ficha-fuente"></p></div>
+    <div class="ficha-acciones">
+      <button id="entrar" hidden></button>
+      <button id="cerrar-ficha">Seguir explorando</button>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
