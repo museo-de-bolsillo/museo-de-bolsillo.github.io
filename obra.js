@@ -2,7 +2,7 @@
 // El plano mide 1 de ancho, igual que el marcador, para calzar sobre el póster impreso.
 import * as THREE from "three";
 import { VERT, FRAG_COMP, FRAG_PAISAJE, FRAG_ORQUIDEA, FRAG_TARJETA } from "./shaders.js";
-import { ZONAS } from "./contenido.js";
+import { ZONAS, PINES } from "./contenido.js";
 
 const TAM = { comp: [816, 1024], paisaje: [810, 1024], orquidea: [810, 1024] };
 const ALTO = 1024 / 816;
@@ -33,6 +33,77 @@ function texturaPolvo() {
 }
 
 const suave = (a, b, v) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+const rebote = (v) => { const x = Math.min(1, Math.max(0, v)) - 1; return 1 + 2.70158 * x * x * x + 1.70158 * x * x; };
+
+function lienzo(w, h, dibujar) {
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  dibujar(c.getContext("2d"));
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+// Círculo dorado con el número de la sala; morado con un visto cuando ya se visitó.
+function texturaPin(n, visitado) {
+  return lienzo(256, 256, (ctx) => {
+    ctx.beginPath();
+    ctx.arc(128, 128, 104, 0, Math.PI * 2);
+    ctx.fillStyle = visitado ? "#5B23A8" : "#F7B22C";
+    ctx.fill();
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = visitado ? "#F7B22C" : "#FFFFFF";
+    ctx.stroke();
+    if (visitado) {
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 22;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(80, 132);
+      ctx.lineTo(114, 166);
+      ctx.lineTo(180, 98);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = "#2A1250";
+      ctx.font = "bold 118px system-ui, -apple-system, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(n, 128, 138);
+    }
+  });
+}
+
+function texturaAnillo() {
+  return lienzo(256, 256, (ctx) => {
+    ctx.beginPath();
+    ctx.arc(128, 128, 112, 0, Math.PI * 2);
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = "#F7B22C";
+    ctx.stroke();
+  });
+}
+
+function texturaEtiqueta(texto) {
+  return lienzo(512, 128, (ctx) => {
+    ctx.font = "bold 62px system-ui, -apple-system, 'Segoe UI', sans-serif";
+    const w = Math.min(500, ctx.measureText(texto).width + 70);
+    const x = (512 - w) / 2;
+    ctx.fillStyle = "rgba(26, 12, 52, 0.86)";
+    ctx.beginPath();
+    ctx.moveTo(x + 40, 14);
+    ctx.arcTo(x + w, 14, x + w, 114, 50);
+    ctx.arcTo(x + w, 114, x, 114, 50);
+    ctx.arcTo(x, 114, x, 14, 50);
+    ctx.arcTo(x, 14, x + w, 14, 50);
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(texto, 256, 68);
+  });
+}
 
 export async function crearObra() {
   const [tComp, tPais, tOrq, mCinta, mRio, tTarj] = await Promise.all([
@@ -92,6 +163,41 @@ export async function crearObra() {
   polvo.renderOrder = 6;
   grupo.add(polvo);
 
+  // Círculos que invitan a tocar: uno por sala y uno sobre la tarjeta.
+  const texAnillo = texturaAnillo();
+  const sprite = (map, orden) => {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, depthTest: false }));
+    s.renderOrder = orden;
+    return s;
+  };
+  const pines = [...PINES, { sala: "tarjeta", n: "★", texto: "Tarjeta", enTarjeta: true }].map((def, i) => {
+    const g = new THREE.Group();
+    const anillo = sprite(texAnillo, 20);
+    const disco = sprite(texturaPin(def.n, false), 21);
+    const etiqueta = sprite(texturaEtiqueta(def.texto), 22);
+    disco.userData.sala = etiqueta.userData.sala = def.sala;
+    etiqueta.position.y = -0.068;
+    etiqueta.scale.set(0.17, 0.0425, 1);
+    g.add(anillo, disco, etiqueta);
+    if (def.enTarjeta) {
+      g.position.set(anchoT / 2 - 0.03, altoT / 2 - 0.005, 0.03);
+      tarjeta.add(g);
+    } else {
+      g.position.set(def.x / 816 - 0.5, (0.5 - def.y / 1024) * ALTO, 0.07);
+      grupo.add(g);
+    }
+    return { def, g, anillo, disco, etiqueta, i, visitado: false };
+  });
+  const tocables = pines.flatMap((p) => [p.disco, p.etiqueta]);
+
+  function marcar(sala) {
+    const p = pines.find((q) => q.def.sala === sala);
+    if (!p || p.visitado) return;
+    p.visitado = true;
+    p.disco.material.map = texturaPin(p.def.n, true);
+    p.disco.material.needsUpdate = true;
+  }
+
   let actual = "comp";
   let transicion = { de: null, a: "comp", inicio: -10 };
   let inicio = null;
@@ -136,10 +242,28 @@ export async function crearObra() {
       pos[i * 3 + 2] = 0.06 * alza + p * 0.32;
     }
     geoPolvo.attributes.position.needsUpdate = true;
+
+    // Los círculos aparecen uno tras otro, laten y flotan sobre la obra.
+    for (const p of pines) {
+      const ap = rebote((ti - 1.6 - p.i * 0.15) / 0.5) * (enComp > 0.5 ? 1 : 0);
+      p.g.visible = ap > 0.01;
+      const s = 0.085 * ap * (p.visitado ? 0.85 : 1 + 0.06 * Math.sin(t * 3 + p.i));
+      p.disco.scale.set(s, s, 1);
+      const k = (t * 0.7 + p.i * 0.17) % 1;
+      const sa = 0.085 * ap * (1 + k);
+      p.anillo.scale.set(sa, sa, 1);
+      p.anillo.material.opacity = p.visitado ? 0 : (1 - k) * 0.9;
+      p.etiqueta.material.opacity = Math.min(1, ap);
+      if (!p.def.enTarjeta) p.g.position.z = 0.07 + 0.008 * Math.sin(t * 1.5 + p.i);
+    }
   }
 
   // Devuelve la sala tocada y deja una onda donde cayó el dedo.
   function tocar(rayo) {
+    if (actual === "comp") {
+      const pin = rayo.intersectObjects(tocables.filter((s) => s.parent.visible), false)[0];
+      if (pin) return pin.object.userData.sala;
+    }
     const malla = mallas[actual];
     const objetivos = actual === "comp" && tarjeta.material.uniforms.uOpacidad.value > 0.5 ? [tarjeta, malla] : [malla];
     const hit = rayo.intersectObjects(objetivos, false)[0];
@@ -164,5 +288,5 @@ export async function crearObra() {
     return null;
   }
 
-  return { grupo, actualizar, reiniciar, tocar, irA, escena: () => actual, alto: ALTO };
+  return { grupo, actualizar, reiniciar, tocar, irA, marcar, totalSalas: pines.length, escena: () => actual, alto: ALTO };
 }

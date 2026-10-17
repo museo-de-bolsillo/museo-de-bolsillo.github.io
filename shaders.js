@@ -87,23 +87,25 @@ void main() {
   vec2 p = pixel();
   float t = uTiempo;
   vec2 D = vec2(0.0);
-  // Cielo del paisaje dentro del cabello.
-  D += oleaje(p, t, 2.2, elipse(p, vec2(640.0, 215.0), vec2(165.0, 125.0), 0.35), 0.045, 1.3);
+  // La cresta de Sie (x < 500) y la línea del cabello no se deforman: si se mueven, se ven cortadas.
+  float cresta = 1.0 - smoothstep(380.0, 400.0, p.x) + smoothstep(488.0, 505.0, p.x);
+  // Cielo del paisaje dentro del cabello, lejos del contorno.
+  D += oleaje(p, t, 2.2, elipse(p, vec2(655.0, 228.0), vec2(135.0, 100.0), 0.5), 0.045, 1.3);
   // Gotas del sol que se alargan.
   D.y += gauss(p, vec2(703.0, 330.0), vec2(40.0, 60.0)) * step(285.0, p.y) * 7.0 * (0.5 + 0.5 * sin(t * 2.1)) * clamp((p.y - 290.0) / 70.0, 0.0, 1.0);
   // Laguna e isla.
   float r = length((p - vec2(683.0, 540.0)) / vec2(80.0, 22.0));
   D.y += elipse(p, vec2(683.0, 540.0), vec2(82.0, 24.0), 0.35) * 0.9 * sin(r * 9.0 - t * 4.0);
-  D.y += elipse(p, vec2(515.0, 245.0), vec2(55.0, 62.0), 0.5) * 4.5 * sin(t * TAU / 3.0);
+  D.y += elipse(p, vec2(525.0, 243.0), vec2(52.0, 64.0), 0.5) * smoothstep(472.0, 488.0, p.x) * 4.5 * sin(t * TAU / 3.0);
   // Orquídeas desde el tallo.
-  D += girar(p, vec2(330.0, 235.0), 0.035 * sin(t * 1.6), gauss(p, vec2(300.0, 140.0), vec2(95.0)));
+  D += girar(p, vec2(330.0, 235.0), 0.035 * sin(t * 1.6), gauss(p, vec2(300.0, 140.0), vec2(95.0)) * cresta);
   D += girar(p, vec2(190.0, 425.0), 0.035 * sin(t * 1.6 + 1.3), gauss(p, vec2(125.0, 385.0), vec2(80.0)));
   D += girar(p, vec2(110.0, 485.0), 0.035 * sin(t * 1.6 + 2.1), gauss(p, vec2(60.0, 470.0), vec2(55.0)));
   D += girar(p, vec2(230.0, 645.0), 0.035 * sin(t * 1.6 + 2.9), gauss(p, vec2(140.0, 630.0), vec2(85.0)));
   D += girar(p, vec2(320.0, 800.0), 0.035 * sin(t * 1.6 + 3.7), gauss(p, vec2(265.0, 740.0), vec2(85.0)));
   // Enredadera y plumas del búho.
   D.x += gauss(p, vec2(100.0, 400.0), vec2(80.0, 420.0)) * 1.6 * sin(p.y * 0.03 + t * 2.2);
-  D.x += elipse(p, vec2(330.0, 470.0), vec2(210.0, 330.0), 0.35) * (1.0 - gauss(p, vec2(320.0, 440.0), vec2(60.0, 50.0))) * step(p.x, 405.0) * sin((p.x + p.y) * 0.04 - t * 2.4);
+  D.x += elipse(p, vec2(330.0, 470.0), vec2(210.0, 330.0), 0.35) * (1.0 - gauss(p, vec2(320.0, 440.0), vec2(60.0, 50.0))) * (1.0 - smoothstep(380.0, 398.0, p.x)) * sin((p.x + p.y) * 0.04 - t * 2.4);
   // Frailejones del fondo.
   D += girar(p, vec2(45.0, 1030.0), 0.03 * sin(t * 2.0), gauss(p, vec2(45.0, 870.0), vec2(45.0, 90.0)));
   D += girar(p, vec2(100.0, 1030.0), 0.03 * sin(t * 2.0 + 1.4), gauss(p, vec2(100.0, 920.0), vec2(45.0, 90.0)));

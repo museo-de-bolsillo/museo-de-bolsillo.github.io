@@ -10,7 +10,34 @@ const pista = $("#pista");
 const aviso = $("#aviso");
 const aObra = $("#a-obra");
 const MARCADOR = "./targets/poster.mind";
+const ayuda = $("#ayuda");
+const progreso = $("#progreso");
 let obraActiva = null;
+
+// Recorrido: cuántas salas se han descubierto y el mensaje final al completarlas.
+const visitadas = new Set();
+let recorridoIniciado = false;
+let finalPendiente = false;
+
+function actualizarProgreso() {
+  const total = obraActiva.totalSalas;
+  $("#progreso-texto").textContent = `Salas ${visitadas.size}/${total}`;
+  const puntos = $("#puntos");
+  puntos.replaceChildren(...Array.from({ length: total }, (_, i) => {
+    const p = document.createElement("span");
+    p.className = i < visitadas.size ? "punto lleno" : "punto";
+    return p;
+  }));
+}
+
+function iniciarRecorrido() {
+  if (recorridoIniciado) return;
+  recorridoIniciado = true;
+  actualizarProgreso();
+  progreso.hidden = false;
+  setTimeout(() => { if (visitadas.size === 0) ayuda.hidden = false; }, 1800);
+  setTimeout(() => { ayuda.hidden = true; }, 9000);
+}
 
 function avisar(texto) {
   aviso.textContent = texto;
@@ -27,6 +54,13 @@ function entrar() {
 function mostrarSala(clave) {
   const s = SALAS[clave];
   if (!s) return;
+  ayuda.hidden = true;
+  if (clave !== "final" && obraActiva && !visitadas.has(clave)) {
+    visitadas.add(clave);
+    obraActiva.marcar(clave);
+    actualizarProgreso();
+    if (visitadas.size === obraActiva.totalSalas) finalPendiente = true;
+  }
   $("#ficha-nombre").textContent = s.nombre;
   $("#ficha-autora").textContent = s.autora;
   $("#ficha-obra").textContent = s.obra;
@@ -47,7 +81,13 @@ function mostrarSala(clave) {
   ficha.hidden = false;
 }
 
-$("#cerrar-ficha").addEventListener("click", () => { ficha.hidden = true; });
+$("#cerrar-ficha").addEventListener("click", () => {
+  ficha.hidden = true;
+  if (finalPendiente) {
+    finalPendiente = false;
+    setTimeout(() => mostrarSala("final"), 350);
+  }
+});
 $("#volver").addEventListener("click", () => location.reload());
 aObra.addEventListener("click", () => {
   obraActiva?.irA("comp");
@@ -98,7 +138,8 @@ async function modoCamara() {
   let perdidoDesde = -Infinity;
   ancla.onTargetFound = () => {
     if (performance.now() - perdidoDesde > 2500) obra.reiniciar();
-    pista.textContent = "Toca la obra para explorar";
+    pista.textContent = "Toca los círculos dorados";
+    iniciarRecorrido();
   };
   ancla.onTargetLost = () => {
     perdidoDesde = performance.now();
@@ -139,7 +180,7 @@ async function modoSinCamara() {
     inclinacion = false;
   }
   entrar();
-  pista.textContent = "Inclina el celular · toca la obra";
+  pista.textContent = "Inclina el celular · toca los círculos";
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   escenario.appendChild(renderer.domElement);
@@ -150,6 +191,7 @@ async function modoSinCamara() {
   const obra = await crearObra();
   obraActiva = obra;
   mesa.add(obra.grupo);
+  iniciarRecorrido();
 
   function ajustar() {
     const w = escenario.clientWidth, h = escenario.clientHeight;

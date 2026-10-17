@@ -6,6 +6,8 @@ Página web que se abre con el QR del póster. Al apuntar la cámara al dibujo d
 - Gotea el sol, la laguna hace ondas, la isla flota y un brillo dorado recorre la cinta Quimbaya.
 - La tarjeta se levanta del dibujo y suelta polvo dorado en 3D.
 
+Sobre la obra flotan seis círculos dorados numerados, que laten y llevan el nombre de su sala: Sie, Búho, Atardecer, Quimbaya, Flores y Tarjeta. Al reconocer el póster aparece un mensaje que invita a tocarlos, y un contador muestra las salas descubiertas (0/6). Cada sala abierta pasa a un visto y, al completar las seis, aparece un mensaje de cierre con el resumen de las lecciones. Los círculos se definen en `PINES`, en `contenido.js`.
+
 Al tocar un elemento se abre su sala, con la lección y un dato. Desde la sala del atardecer se entra al paisaje, y desde la de las flores, a la orquídea. Cada toque deja una onda en la obra.
 
 Sin cámara, la obra se mueve al inclinar el celular. Ese es el plan B, junto con el video.
