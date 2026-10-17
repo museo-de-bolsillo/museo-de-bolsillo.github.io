@@ -1,8 +1,8 @@
 // Arma la obra en 3D: las tres escenas animadas, la tarjeta que flota y el polvo dorado.
 // El plano mide 1 de ancho, igual que el marcador, para calzar sobre el póster impreso.
 import * as THREE from "three";
-import { VERT, FRAG_COMP, FRAG_PAISAJE, FRAG_ORQUIDEA, FRAG_TARJETA } from "./shaders.js";
-import { ZONAS, PINES } from "./contenido.js";
+import { VERT, FRAG_COMP, FRAG_PAISAJE, FRAG_ORQUIDEA, FRAG_TARJETA } from "./shaders.js?v=6";
+import { ZONAS, PINES, PIN_TARJETA } from "./contenido.js?v=6";
 
 const TAM = { comp: [816, 1024], paisaje: [810, 1024], orquidea: [810, 1024] };
 const ALTO = 1024 / 816;
@@ -45,63 +45,114 @@ function lienzo(w, h, dibujar) {
   return t;
 }
 
-// Círculo dorado con el número de la sala; morado con un visto cuando ya se visitó.
-function texturaPin(n, visitado) {
+const ORO = "#F7B22C";
+const NOCHE = "#2A1250";
+
+// Símbolos de la obra, dibujados en trazo dorado (como los de la cinta Quimbaya).
+const ICONOS = {
+  espiral(ctx) {
+    ctx.beginPath();
+    for (let i = 0; i <= 120; i++) {
+      const a = (i / 120) * Math.PI * 2 * 2.25;
+      const r = 6 + (i / 120) * 46;
+      const x = 128 + r * Math.cos(a), y = 128 + r * Math.sin(a);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+  },
+  ojo(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(66, 128);
+    ctx.quadraticCurveTo(128, 70, 190, 128);
+    ctx.quadraticCurveTo(128, 186, 66, 128);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(128, 128, 18, 0, Math.PI * 2);
+    ctx.fill();
+  },
+  sol(ctx) {
+    ctx.beginPath();
+    ctx.arc(128, 112, 32, 0, Math.PI * 2);
+    ctx.stroke();
+    for (const [x, largo] of [[106, 36], [128, 56], [150, 28]]) {
+      ctx.beginPath();
+      ctx.moveTo(x, 140);
+      ctx.lineTo(x, 140 + largo);
+      ctx.stroke();
+    }
+  },
+  cuadros(ctx) {
+    ctx.strokeRect(80, 80, 96, 96);
+    ctx.strokeRect(108, 108, 40, 40);
+  },
+  flor(ctx) {
+    for (let k = 0; k < 5; k++) {
+      const a = -Math.PI / 2 + (k * Math.PI * 2) / 5;
+      ctx.beginPath();
+      ctx.ellipse(128 + Math.cos(a) * 30, 128 + Math.sin(a) * 30, 22, 13, a, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(128, 128, 9, 0, Math.PI * 2);
+    ctx.fill();
+  },
+  moneda(ctx) {
+    ctx.beginPath();
+    ctx.arc(128, 128, 50, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(128, 128, 32, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(128, 118, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(116, 146);
+    ctx.lineTo(128, 128);
+    ctx.lineTo(140, 146);
+    ctx.stroke();
+  },
+};
+
+// Símbolo en un círculo translúcido; al visitarlo, el círculo se llena de oro.
+function texturaPin(icono, visitado) {
   return lienzo(256, 256, (ctx) => {
     ctx.beginPath();
-    ctx.arc(128, 128, 104, 0, Math.PI * 2);
-    ctx.fillStyle = visitado ? "#5B23A8" : "#F7B22C";
+    ctx.arc(128, 128, 98, 0, Math.PI * 2);
+    ctx.fillStyle = visitado ? ORO : "rgba(26, 12, 52, 0.55)";
     ctx.fill();
-    ctx.lineWidth = 14;
-    ctx.strokeStyle = visitado ? "#F7B22C" : "#FFFFFF";
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = visitado ? "rgba(255,255,255,0.9)" : ORO;
     ctx.stroke();
-    if (visitado) {
-      ctx.strokeStyle = "#FFFFFF";
-      ctx.lineWidth = 22;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.beginPath();
-      ctx.moveTo(80, 132);
-      ctx.lineTo(114, 166);
-      ctx.lineTo(180, 98);
-      ctx.stroke();
-    } else {
-      ctx.fillStyle = "#2A1250";
-      ctx.font = "bold 118px system-ui, -apple-system, 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(n, 128, 138);
-    }
+    ctx.lineWidth = 9;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = ctx.fillStyle = visitado ? NOCHE : ORO;
+    ICONOS[icono](ctx);
   });
 }
 
 function texturaAnillo() {
   return lienzo(256, 256, (ctx) => {
     ctx.beginPath();
-    ctx.arc(128, 128, 112, 0, Math.PI * 2);
-    ctx.lineWidth = 12;
-    ctx.strokeStyle = "#F7B22C";
+    ctx.arc(128, 128, 116, 0, Math.PI * 2);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = ORO;
     ctx.stroke();
   });
 }
 
+// Nombre de la sala en letra blanca con sombra suave, sin recuadro.
 function texturaEtiqueta(texto) {
   return lienzo(512, 128, (ctx) => {
-    ctx.font = "bold 62px system-ui, -apple-system, 'Segoe UI', sans-serif";
-    const w = Math.min(500, ctx.measureText(texto).width + 70);
-    const x = (512 - w) / 2;
-    ctx.fillStyle = "rgba(26, 12, 52, 0.86)";
-    ctx.beginPath();
-    ctx.moveTo(x + 40, 14);
-    ctx.arcTo(x + w, 14, x + w, 114, 50);
-    ctx.arcTo(x + w, 114, x, 114, 50);
-    ctx.arcTo(x, 114, x, 14, 50);
-    ctx.arcTo(x, 14, x + w, 14, 50);
-    ctx.fill();
-    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "600 54px system-ui, -apple-system, 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(texto, 256, 68);
+    ctx.shadowColor = "rgba(10, 4, 24, 0.9)";
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(texto, 256, 64);
+    ctx.fillText(texto, 256, 64);
   });
 }
 
@@ -170,14 +221,14 @@ export async function crearObra() {
     s.renderOrder = orden;
     return s;
   };
-  const pines = [...PINES, { sala: "tarjeta", n: "★", texto: "Tarjeta", enTarjeta: true }].map((def, i) => {
+  const pines = [...PINES, { ...PIN_TARJETA, enTarjeta: true }].map((def, i) => {
     const g = new THREE.Group();
     const anillo = sprite(texAnillo, 20);
-    const disco = sprite(texturaPin(def.n, false), 21);
+    const disco = sprite(texturaPin(def.icono, false), 21);
     const etiqueta = sprite(texturaEtiqueta(def.texto), 22);
     disco.userData.sala = etiqueta.userData.sala = def.sala;
-    etiqueta.position.y = -0.068;
-    etiqueta.scale.set(0.17, 0.0425, 1);
+    etiqueta.position.y = -0.072;
+    etiqueta.scale.set(0.2, 0.05, 1);
     g.add(anillo, disco, etiqueta);
     if (def.enTarjeta) {
       g.position.set(anchoT / 2 - 0.03, altoT / 2 - 0.005, 0.03);
@@ -194,7 +245,7 @@ export async function crearObra() {
     const p = pines.find((q) => q.def.sala === sala);
     if (!p || p.visitado) return;
     p.visitado = true;
-    p.disco.material.map = texturaPin(p.def.n, true);
+    p.disco.material.map = texturaPin(p.def.icono, true);
     p.disco.material.needsUpdate = true;
   }
 
@@ -247,12 +298,12 @@ export async function crearObra() {
     for (const p of pines) {
       const ap = rebote((ti - 1.6 - p.i * 0.15) / 0.5) * (enComp > 0.5 ? 1 : 0);
       p.g.visible = ap > 0.01;
-      const s = 0.085 * ap * (p.visitado ? 0.85 : 1 + 0.06 * Math.sin(t * 3 + p.i));
+      const s = 0.088 * ap * (p.visitado ? 0.9 : 1 + 0.05 * Math.sin(t * 2.5 + p.i));
       p.disco.scale.set(s, s, 1);
       const k = (t * 0.7 + p.i * 0.17) % 1;
-      const sa = 0.085 * ap * (1 + k);
+      const sa = 0.088 * ap * (1 + 0.7 * k);
       p.anillo.scale.set(sa, sa, 1);
-      p.anillo.material.opacity = p.visitado ? 0 : (1 - k) * 0.9;
+      p.anillo.material.opacity = p.visitado ? 0 : (1 - k) * 0.7;
       p.etiqueta.material.opacity = Math.min(1, ap);
       if (!p.def.enTarjeta) p.g.position.z = 0.07 + 0.008 * Math.sin(t * 1.5 + p.i);
     }

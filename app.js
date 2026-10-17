@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { crearObra } from "./obra.js";
-import { SALAS } from "./contenido.js";
+import { crearObra } from "./obra.js?v=6";
+import { SALAS } from "./contenido.js?v=6";
 
 const $ = (s) => document.querySelector(s);
 const inicio = $("#inicio");
@@ -95,7 +95,9 @@ aObra.addEventListener("click", () => {
 });
 
 // Un toque corto deja una onda y abre la sala; arrastrar no cuenta como toque.
-function escucharToques(elemento, camara, obra) {
+// `lienzo` es el canvas que dibuja la escena: en modo cámara es más grande que la pantalla
+// (se recorta para llenarla), así que el toque se calcula sobre él y no sobre el contenedor.
+function escucharToques(elemento, camara, obra, lienzo = elemento) {
   const rayo = new THREE.Raycaster();
   const punto = new THREE.Vector2();
   let desde = null;
@@ -105,7 +107,7 @@ function escucharToques(elemento, camara, obra) {
     const movido = Math.hypot(e.clientX - desde[0], e.clientY - desde[1]);
     desde = null;
     if (movido > 10 || !ficha.hidden) return;
-    const r = elemento.getBoundingClientRect();
+    const r = lienzo.getBoundingClientRect();
     punto.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     rayo.setFromCamera(punto, camara);
     const sala = obra.tocar(rayo);
@@ -138,7 +140,7 @@ async function modoCamara() {
   let perdidoDesde = -Infinity;
   ancla.onTargetFound = () => {
     if (performance.now() - perdidoDesde > 2500) obra.reiniciar();
-    pista.textContent = "Toca los círculos dorados";
+    pista.textContent = "Toca los símbolos dorados";
     iniciarRecorrido();
   };
   ancla.onTargetLost = () => {
@@ -164,7 +166,7 @@ async function modoCamara() {
     obra.actualizar(reloj.getElapsedTime());
     renderer.render(scene, camera);
   });
-  escucharToques(escenario, camera, obra);
+  escucharToques(escenario, camera, obra, renderer.domElement);
 }
 
 async function modoSinCamara() {
@@ -180,7 +182,7 @@ async function modoSinCamara() {
     inclinacion = false;
   }
   entrar();
-  pista.textContent = "Inclina el celular · toca los círculos";
+  pista.textContent = "Inclina el celular · toca los símbolos";
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   escenario.appendChild(renderer.domElement);
@@ -242,4 +244,6 @@ async function modoSinCamara() {
 
 $("#btn-camara").addEventListener("click", () => modoCamara().catch((e) => avisar(`Error: ${e.message}`)));
 $("#btn-previa").addEventListener("click", () => modoSinCamara().catch((e) => avisar(`Error: ${e.message}`)));
+window.__museoListo = true;
+aviso.hidden = true;
 if (location.hash === "#previa") modoSinCamara();

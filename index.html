@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Museo de Bolsillo</title>
 <meta name="description" content="Experiencia de realidad aumentada: el póster cobra vida y abre un museo de educación financiera.">
-<meta name="theme-color" content="#4B1C8F">
+<meta name="theme-color" content="#3A1670">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700&display=swap">
@@ -15,8 +15,9 @@
     --fondo-2: #5B23A8;
     --tinta: #FFFFFF;
     --suave: #D9CCF2;
-    --magenta: #E0569A;
     --oro: #F7B22C;
+    --noche: #2A1250;
+    --velo: rgba(26, 12, 52, 0.72);
     --panel: #FFFBF4;
     --panel-tinta: #1A1626;
     --panel-suave: #5C5868;
@@ -27,55 +28,63 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--tinta); font-family: var(--f-texto); -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
-  button, a.btn { font: inherit; cursor: pointer; }
-  button:focus-visible, a:focus-visible { outline: 3px solid var(--oro); outline-offset: 3px; }
+  button, a.btn { font: inherit; cursor: pointer; touch-action: manipulation; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--oro); outline-offset: 3px; }
+  .icono { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  #inicio { position: fixed; inset: 0; overflow-y: auto; background: radial-gradient(120% 80% at 50% 0%, var(--fondo-2), var(--fondo)); display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); z-index: 10; }
-  .portada { width: min(100%, 440px); display: grid; gap: 18px; }
-  .ojo { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--oro); font-weight: 700; }
-  h1 { font-family: var(--f-titulo); font-weight: 400; font-size: clamp(2.6rem, 11vw, 3.4rem); line-height: 1; margin: 0; }
-  .portada p { margin: 0; line-height: 1.55; font-size: 1.05rem; color: var(--suave); }
-  .guia { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; background: rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; }
-  .guia img { width: 96px; border-radius: 8px; display: block; }
-  .guia p { font-size: 0.95rem; color: var(--tinta); }
+  /* Portada */
+  #inicio { position: fixed; inset: 0; overflow-y: auto; background: radial-gradient(120% 80% at 50% 0%, var(--fondo-2), var(--fondo)); display: grid; place-items: center; padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom)); z-index: 10; }
+  .portada { width: min(100%, 420px); display: grid; gap: 20px; }
+  .ojo { font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oro); font-weight: 600; }
+  h1 { font-family: var(--f-titulo); font-weight: 400; font-size: clamp(2.5rem, 10.5vw, 3.2rem); line-height: 1; margin: 0; }
+  .franja { width: 100%; height: 18px; display: block; color: var(--oro); opacity: 0.85; }
+  .portada p { margin: 0; line-height: 1.55; color: var(--suave); }
+  .guia { display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; border-top: 1px solid rgba(255,255,255,0.14); border-bottom: 1px solid rgba(255,255,255,0.14); padding-block: 14px; }
+  .guia img { width: 76px; border-radius: 6px; display: block; }
+  .guia p { font-size: 0.92rem; color: var(--tinta); }
   .acciones { display: grid; gap: 10px; }
-  .btn { display: block; text-align: center; text-decoration: none; border: 0; border-radius: 14px; padding: 16px 18px; font-weight: 700; font-size: 1.05rem; }
-  .btn-principal { background: var(--oro); color: #2A1250; }
-  .btn-secundario { background: transparent; color: var(--tinta); border: 2px solid rgba(255,255,255,0.7); }
-  .btn-texto { background: none; color: var(--suave); text-decoration: underline; padding: 6px; font-weight: 600; }
-  .creditos { font-size: 0.8rem; color: var(--suave); border-top: 1px solid rgba(255,255,255,0.18); padding-top: 14px; }
-  #aviso { background: #FFF2DC; color: #6B4A0C; border-radius: 10px; padding: 12px 14px; font-size: 0.95rem; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; border-radius: 999px; padding: 13px 20px; font-weight: 600; font-size: 1rem; }
+  .btn-principal { background: var(--oro); color: var(--noche); border: 0; }
+  .btn-secundario { background: transparent; color: var(--tinta); border: 1.5px solid rgba(255,255,255,0.55); }
+  .btn-texto { color: var(--suave); font-weight: 500; font-size: 0.92rem; padding: 6px; }
+  .creditos { font-size: 0.78rem; line-height: 1.5; color: var(--suave); }
+  #aviso { background: rgba(255, 242, 220, 0.96); color: #6B4A0C; border-radius: 12px; padding: 12px 14px; font-size: 0.92rem; line-height: 1.45; }
 
-  #escenario { position: fixed; inset: 0; overflow: hidden; background: radial-gradient(circle at 50% 40%, #4B2290, #1B0B36); }
+  /* Experiencia */
+  #escenario { position: fixed; inset: 0; overflow: hidden; touch-action: none; background: radial-gradient(circle at 50% 40%, #4B2290, #1B0B36); }
   #escenario canvas { touch-action: none; }
-  #pista { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: rgba(26,12,52,0.8); color: #FFFFFF; padding: 9px 16px; border-radius: 99px; font-size: 0.92rem; z-index: 5; white-space: nowrap; pointer-events: none; max-width: calc(100% - 120px); overflow: hidden; text-overflow: ellipsis; }
-  .flotante { position: fixed; z-index: 6; background: rgba(26,12,52,0.8); color: #FFFFFF; border: 0; border-radius: 99px; height: 42px; padding: 0 14px; font-weight: 600; }
-  #volver { top: max(10px, env(safe-area-inset-top)); left: 12px; width: 42px; padding: 0; font-size: 1.3rem; }
-  #a-obra { bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
-
-  #ayuda { position: fixed; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 64px); transform: translateX(-50%); z-index: 7; width: min(calc(100% - 32px), 360px); background: var(--oro); color: #2A1250; border-radius: 16px; padding: 14px 16px; font-weight: 700; line-height: 1.35; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.35); animation: latido 1.6s ease-in-out infinite; pointer-events: none; }
-  @keyframes latido { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.03); } }
-  #progreso { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 10px; background: rgba(26,12,52,0.8); color: #FFFFFF; border-radius: 99px; padding: 9px 16px; font-size: 0.9rem; font-weight: 600; white-space: nowrap; pointer-events: none; }
+  .velo { background: var(--velo); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--tinta); border: 1px solid rgba(247, 178, 44, 0.35); }
+  #pista { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); padding: 8px 14px; border-radius: 999px; font-size: 0.86rem; z-index: 5; white-space: nowrap; pointer-events: none; max-width: calc(100% - 120px); overflow: hidden; text-overflow: ellipsis; }
+  .flotante { position: fixed; z-index: 6; border-radius: 999px; height: 40px; padding: 0 16px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  #volver { top: max(10px, env(safe-area-inset-top)); left: 12px; width: 40px; padding: 0; justify-content: center; }
+  #a-obra { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 50px); left: 50%; transform: translateX(-50%); }
+  #ayuda { position: fixed; left: 50%; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 52px); transform: translateX(-50%); z-index: 7; width: max-content; max-width: calc(100% - 32px); display: flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 16px; font-size: 0.9rem; line-height: 1.3; pointer-events: none; animation: aparecer 0.6s ease-out both; }
+  #ayuda .icono { color: var(--oro); width: 20px; height: 20px; }
+  @keyframes aparecer { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  #progreso { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 10px; border-radius: 999px; padding: 7px 14px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; pointer-events: none; }
   #progreso .puntos { display: flex; gap: 5px; }
-  #progreso .punto { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--oro); }
+  #progreso .punto { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--oro); }
   #progreso .punto.lleno { background: var(--oro); }
-  #a-obra { bottom: calc(max(18px, env(safe-area-inset-bottom)) + 52px); }
   @media (prefers-reduced-motion: reduce) { #ayuda { animation: none; } }
-  #ficha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; background: var(--panel); color: var(--panel-tinta); border-radius: 20px 20px 0 0; padding: 20px 20px max(20px, env(safe-area-inset-bottom)); max-height: 72vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.35); }
+
+  /* Ficha de sala */
+  #ficha { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; background: var(--panel); color: var(--panel-tinta); border-radius: 18px 18px 0 0; padding: 18px 20px max(20px, env(safe-area-inset-bottom)); max-height: 72vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.35); }
   .ficha-in { width: min(100%, 560px); margin: 0 auto; display: grid; gap: 12px; }
-  #ficha h2 { font-family: var(--f-titulo); font-weight: 400; font-size: 1.6rem; margin: 0; line-height: 1.1; }
-  #ficha .autora { font-size: 0.85rem; color: var(--turquesa); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-  #ficha .rotulo { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--panel-suave); font-weight: 700; display: block; margin-bottom: 2px; }
+  .ficha-in::before { content: ""; justify-self: center; width: 40px; height: 4px; border-radius: 99px; background: #DDD6E8; }
+  #ficha h2 { font-family: var(--f-titulo); font-weight: 400; font-size: 1.5rem; margin: 0; line-height: 1.1; }
+  #ficha .autora { font-size: 0.78rem; color: var(--turquesa); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  #ficha .rotulo { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--panel-suave); font-weight: 700; display: block; margin-bottom: 2px; }
   #ficha p { margin: 0; line-height: 1.5; }
-  #ficha .dato { background: #F3EBDD; border-radius: 12px; padding: 12px 14px; }
-  #ficha .dato strong { font-family: var(--f-titulo); font-weight: 400; font-size: 1.1rem; color: #8E2257; }
-  #ficha .fuente { font-size: 0.8rem; color: var(--panel-suave); margin-top: 4px; }
-  .ficha-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
-  .ficha-acciones button { border: 0; border-radius: 12px; padding: 12px 18px; font-weight: 700; }
-  #entrar { background: #5B23A8; color: #FFFFFF; }
-  #cerrar-ficha { background: #E9E3F3; color: var(--panel-tinta); }
-  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  #ficha .dato { border-left: 3px solid var(--oro); padding: 4px 0 4px 12px; }
+  #ficha .dato strong { font-family: var(--f-titulo); font-weight: 400; font-size: 1.05rem; color: #8E2257; }
+  #ficha .fuente { font-size: 0.78rem; color: var(--panel-suave); margin-top: 4px; }
+  .ficha-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ficha-acciones button { border-radius: 999px; padding: 11px 18px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+  #entrar { background: var(--noche); color: #FFFFFF; border: 0; }
+  #entrar .icono { color: var(--oro); }
+  #cerrar-ficha { background: transparent; color: var(--panel-tinta); border: 1.5px solid #CFC6DD; }
 </style>
+<script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -88,31 +97,50 @@
 </head>
 <body>
 
+<!-- Íconos tomados de los símbolos de la obra -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-espiral" viewBox="0 0 24 24"><path d="M11 12a1.6 1.6 0 0 1 3.2 0a3.2 3.2 0 0 1-6.4 0a4.8 4.8 0 0 1 9.6 0a6.4 6.4 0 0 1-12.8 0a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2 12q10-10 20 0q-10 10-20 0z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+  <symbol id="i-sol" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 15v4M12 15v6M15 15v3"/></symbol>
+  <symbol id="i-volver" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+</svg>
+
 <main id="inicio">
   <div class="portada">
     <span class="ojo">Proyecto de Diseño III · UNAD</span>
     <h1>Museo de Bolsillo</h1>
-    <p>La tarjeta que guarda la moneda abre un museo. Apunta la cámara al póster, mira cómo la obra cobra vida y toca los círculos dorados para recorrer sus seis salas.</p>
+    <svg class="franja" viewBox="0 0 360 18" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <pattern id="quimbaya" width="54" height="18" patternUnits="userSpaceOnUse">
+          <path d="M9 9a1 1 0 0 1 2 0a2 2 0 0 1-4 0a3 3 0 0 1 6 0a4.5 4.5 0 0 1-9 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <rect x="22" y="3" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="26" y="7" width="4" height="4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M40 14l6-10 6 10z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </pattern>
+      </defs>
+      <rect width="360" height="18" fill="url(#quimbaya)"/>
+    </svg>
+    <p>La tarjeta que guarda la moneda abre un museo. Apunta la cámara al póster, mira cómo la obra cobra vida y toca sus símbolos dorados para recorrer las seis salas.</p>
     <div class="guia">
-      <img src="targets/poster.jpg" alt="Miniatura del dibujo del póster: Sie y el búho con orquídeas, el paisaje y la tarjeta">
+      <img src="targets/poster.jpg" alt="Miniatura del póster: Sie y el búho con orquídeas, el paisaje y la tarjeta">
       <p>Apunta a este dibujo en el póster, o en otra pantalla, y mantenlo completo en la cámara.</p>
     </div>
     <div class="acciones">
-      <button class="btn btn-principal" id="btn-camara">Abrir la cámara</button>
-      <button class="btn btn-secundario" id="btn-previa">Ver sin cámara</button>
+      <button type="button" class="btn btn-principal" id="btn-camara"><svg class="icono"><use href="#i-espiral"/></svg>Abrir la cámara</button>
+      <button type="button" class="btn btn-secundario" id="btn-previa"><svg class="icono"><use href="#i-ojo"/></svg>Ver sin cámara</button>
       <a class="btn btn-texto" href="video/museo-de-bolsillo.mp4">Ver el video de la animación</a>
     </div>
     <p id="aviso" hidden></p>
-    <p class="creditos">Obra original de Ledania para el Kit de Bienvenida de Nu. Reinterpretación de Kassandra, Santiago, Stefania, Victor y Daniela. Ejercicio académico de la UNAD, sin relación con Nu. La cámara no graba ni guarda nada.</p>
+    <p class="creditos">Obra original de Ledania para el Kit de Bienvenida de Nu. Reinterpretación de Kasandra Aperador, Estefania Galeano, Santiago Villarreal, Victor Birceño y Daniela Sánchez. Ejercicio académico de la UNAD, sin relación con Nu. La cámara no graba ni guarda nada.</p>
   </div>
 </main>
 
 <div id="escenario" hidden></div>
-<div id="pista" hidden>Apunta al póster</div>
-<button id="volver" class="flotante" hidden aria-label="Volver al inicio">←</button>
-<button id="a-obra" class="flotante" hidden>Volver a la obra</button>
-<p id="ayuda" hidden>Toca los círculos dorados para recorrer las 6 salas del museo</p>
-<div id="progreso" hidden><span id="progreso-texto">Salas 0/6</span><span class="puntos" id="puntos"></span></div>
+<div id="pista" class="velo" hidden>Apunta al póster</div>
+<button type="button" id="volver" class="flotante velo" hidden aria-label="Volver al inicio"><svg class="icono"><use href="#i-volver"/></svg></button>
+<button type="button" id="a-obra" class="flotante velo" hidden><svg class="icono"><use href="#i-volver"/></svg>Volver a la obra</button>
+<p id="ayuda" class="velo" hidden><svg class="icono"><use href="#i-espiral"/></svg>Toca los símbolos dorados para recorrer el museo</p>
+<div id="progreso" class="velo" hidden><span id="progreso-texto">Salas 0/6</span><span class="puntos" id="puntos"></span></div>
 
 <section id="ficha" hidden aria-live="polite">
   <div class="ficha-in">
@@ -122,12 +150,29 @@
     <p><span class="rotulo">Lección</span><span id="ficha-leccion"></span></p>
     <div class="dato"><strong id="ficha-dato"></strong><p class="fuente" id="ficha-fuente"></p></div>
     <div class="ficha-acciones">
-      <button id="entrar" hidden></button>
-      <button id="cerrar-ficha">Seguir explorando</button>
+      <button type="button" id="entrar" hidden></button>
+      <button type="button" id="cerrar-ficha">Seguir explorando</button>
     </div>
   </div>
 </section>
 
-<script type="module" src="./app.js"></script>
+<script>
+  // Si la experiencia no alcanza a cargar (navegador antiguo o sin conexión), se avisa en vez de dejar botones sin respuesta.
+  (function () {
+    function avisar(texto) {
+      var a = document.getElementById("aviso");
+      if (a && !window.__museoListo) { a.textContent = texto; a.hidden = false; }
+    }
+    var consejo = " Abre el enlace en Chrome o Safari actualizados, o mira el video de la animación.";
+    window.addEventListener("error", function () { avisar("La experiencia no pudo cargar en este navegador." + consejo); });
+    ["btn-camara", "btn-previa"].forEach(function (id) {
+      document.getElementById(id).addEventListener("click", function () {
+        if (!window.__museoListo) avisar("Todavía está cargando la experiencia. Espera unos segundos e inténtalo de nuevo.");
+      });
+    });
+    setTimeout(function () { avisar("La experiencia está tardando en cargar." + consejo); }, 10000);
+  })();
+</script>
+<script type="module" src="./app.js?v=6"></script>
 </body>
 </html>

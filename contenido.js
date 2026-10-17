@@ -11,7 +11,7 @@ export const SALAS = {
   },
   sie: {
     nombre: "Sala 1 · Diosa Sie",
-    autora: "Reinterpretación de Santiago",
+    autora: "Reinterpretación de Santiago Villarreal",
     obra: "Sie, diosa muisca del agua, representa la riqueza antigua. Para Ledania es la riqueza que vuelve a las personas, y sus dioses sin género hablan de igualdad.",
     leccion: "El cupo de tu tarjeta no es tu sueldo: es dinero prestado. Haz un presupuesto y usa solo una parte del cupo.",
     dato: "En 2025, el 38,4 % de los hombres y el 34,7 % de las mujeres tenía acceso al crédito.",
@@ -19,7 +19,7 @@ export const SALAS = {
   },
   buho: {
     nombre: "Sala 2 · Búho",
-    autora: "Reinterpretación de Victor",
+    autora: "Reinterpretación de Victor Birceño",
     obra: "El búho de Minerva alza el vuelo en el crepúsculo: la sabiduría llega al final del día.",
     leccion: "Que tu sabiduría llegue antes de firmar: revisa la tasa de interés, la cuota de manejo y tu extracto cada mes.",
     dato: "Solo el 5,6 % de los adultos responde bien una pregunta de interés simple y compuesto.",
@@ -27,7 +27,7 @@ export const SALAS = {
   },
   atardecer: {
     nombre: "Sala 3 · Atardecer",
-    autora: "Reinterpretación de Daniela",
+    autora: "Reinterpretación de Daniela Sánchez",
     obra: "El ocaso del sistema financiero tradicional y el nacimiento de servicios más ágiles. El sol-moneda se derrite y su oro vuelve a la laguna.",
     leccion: "Cada mes cae el corte. Paga el total antes de la fecha límite: si pagas solo el mínimo, el resto genera intereses.",
     dato: "El 31 % de los consumidores espera no poder pagar al menos una de sus deudas.",
@@ -37,7 +37,7 @@ export const SALAS = {
   },
   quimbaya: {
     nombre: "Sala 4 · Figura Quimbaya",
-    autora: "Reinterpretación de Stefania",
+    autora: "Reinterpretación de Estefania Galeano",
     obra: "Los símbolos Quimbaya y la moneda que la tarjeta conserva: el oro de nuestros ancestros y el valor que se guarda.",
     leccion: "Los avances en efectivo cobran intereses altos. Usa la tarjeta para comprar, no para sacar plata.",
     dato: "La tasa promedio de los avances con tarjeta fue 22,93 % E.A. en junio de 2026.",
@@ -45,7 +45,7 @@ export const SALAS = {
   },
   flores: {
     nombre: "Sala 5 · Flores",
-    autora: "Reinterpretación de Kassandra",
+    autora: "Reinterpretación de Kasandra Aperador",
     obra: "La orquídea, flor emblema de Colombia, y la diversidad de personas que tendrán acceso al crédito.",
     leccion: "Pagar a tiempo hace florecer tu historial crediticio y te abre puertas para estudiar o tener vivienda.",
     dato: "La mora de las tarjetas de crédito bajó a 4,0 % en el segundo trimestre de 2026: usarla bien es posible.",
@@ -59,19 +59,21 @@ export const SALAS = {
     obra: "Viste las seis salas: la tarjeta, Sie, el búho, el atardecer, la figura Quimbaya y las flores.",
     leccion: "Usa solo una parte del cupo, lee tu extracto, paga el total antes de la fecha límite, evita los avances en efectivo y cuida tu historial. Así la tarjeta trabaja para ti.",
     dato: "Guarda tu tarjeta: es un museo que cabe en el bolsillo.",
-    fuente: "Kassandra, Santiago, Stefania, Victor y Daniela · Proyecto de Diseño III, UNAD",
+    fuente: "Kasandra Aperador, Estefania Galeano, Santiago Villarreal, Victor Birceño y Daniela Sánchez · Proyecto de Diseño III, UNAD",
   },
 };
 
-// Círculos dorados que invitan a tocar cada sala (en píxeles de la composición).
-// La sala de la tarjeta lleva su círculo sobre la tarjeta que flota.
+// Símbolos dorados que invitan a tocar cada sala (en píxeles de la composición).
+// Cada símbolo sale de la obra: la espiral y los cuadros de la cinta Quimbaya, el ojo, el sol que gotea, la flor.
+// La sala de la tarjeta lleva el suyo (una moneda) sobre la tarjeta que flota.
 export const PINES = [
-  { sala: "sie", n: "1", texto: "Sie", x: 470, y: 330 },
-  { sala: "buho", n: "2", texto: "Búho", x: 225, y: 330 },
-  { sala: "atardecer", n: "3", texto: "Atardecer", x: 655, y: 175 },
-  { sala: "quimbaya", n: "4", texto: "Quimbaya", x: 505, y: 760 },
-  { sala: "flores", n: "5", texto: "Flores", x: 115, y: 380 },
+  { sala: "sie", icono: "espiral", texto: "Sie", x: 470, y: 330 },
+  { sala: "buho", icono: "ojo", texto: "Búho", x: 225, y: 330 },
+  { sala: "atardecer", icono: "sol", texto: "Atardecer", x: 655, y: 175 },
+  { sala: "quimbaya", icono: "cuadros", texto: "Quimbaya", x: 505, y: 760 },
+  { sala: "flores", icono: "flor", texto: "Flores", x: 115, y: 380 },
 ];
+export const PIN_TARJETA = { sala: "tarjeta", icono: "moneda", texto: "Tarjeta" };
 
 // Zonas táctiles por escena, en píxeles de cada imagen. Se revisan en orden: gana la primera.
 //   rect: x0, y0, x1, y1 · elipse: cx, cy, rx, ry (con límites opcionales minX / maxX)
